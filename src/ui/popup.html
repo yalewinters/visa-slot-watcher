@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>美国签证预约监控</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <h1><span class="dot" id="dot"></span><span id="headline">加载中…</span></h1>
+
+  <div class="banner" id="banner" hidden></div>
+
+  <div class="card">
+    <div class="status-detail" id="detail"></div>
+    <div class="meta">
+      <span id="lastCheck">还没有检查过</span>
+      <span id="nextRun"></span>
+    </div>
+  </div>
+
+  <h2>范围内的空位</h2>
+  <ul class="matches" id="matches"></ul>
+  <div class="empty" id="noMatches" hidden>你的日期范围内没有空位。</div>
+
+  <details id="allDaysWrap" hidden>
+    <summary>看到的所有可选日期（<span id="allDaysCount">0</span>）</summary>
+    <p class="empty" id="allDaysHint">
+      日历上显示的所有可选日期，包括不在你范围内的，仅供参考。
+    </p>
+    <ul class="matches" id="allDays"></ul>
+  </details>
+
+  <div class="row spread" style="margin-top:12px">
+    <button class="primary" id="checkNow">立即检查</button>
+    <button id="toggle">暂停</button>
+  </div>
+
+  <footer class="row spread">
+    <span class="row">
+      <a href="#" id="openOptions">设置</a>
+      <a href="#" id="openLog">操作记录</a>
+    </span>
+    <span id="version" class="post"></span>
+  </footer>
+
+  <script src="popup.js" type="module"></script>
+</body>
+</html>

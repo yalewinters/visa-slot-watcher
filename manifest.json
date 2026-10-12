@@ -1,0 +1,92 @@
+{
+  "manifest_version": 3,
+  "name": "美国签证预约监控",
+  "version": "0.14.1",
+  "description": "按你设定的时间间隔自动检查 usvisascheduling.com 的签证预约空位，并推送结果。",
+  "minimum_chrome_version": "116",
+  "permissions": [
+    "storage",
+    "notifications",
+    "tabs",
+    "alarms"
+  ],
+  "host_permissions": [
+    "https://*.usvisascheduling.com/*",
+    "https://atlasauth.b2clogin.com/*",
+    "https://ntfy.sh/*"
+  ],
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "src/ui/popup.html",
+    "default_title": "美国签证预约监控",
+    "default_icon": {
+      "16": "assets/icon16.png",
+      "48": "assets/icon48.png",
+      "128": "assets/icon128.png"
+    }
+  },
+  "options_page": "src/ui/options.html",
+  "icons": {
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.usvisascheduling.com/*"
+      ],
+      "js": [
+        "src/capture-content.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    },
+    {
+      "matches": [
+        "https://*.usvisascheduling.com/*"
+      ],
+      "js": [
+        "src/capture-main.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true,
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://*.usvisascheduling.com/*",
+        "https://atlasauth.b2clogin.com/*"
+      ],
+      "js": [
+        "src/challenge-content.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    },
+    {
+      "matches": [
+        "https://*.usvisascheduling.com/*"
+      ],
+      "js": [
+        "src/highlight-content.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    },
+    {
+      "matches": [
+        "https://*.usvisascheduling.com/*",
+        "https://atlasauth.b2clogin.com/*"
+      ],
+      "js": [
+        "src/quickcheck-content.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ]
+}

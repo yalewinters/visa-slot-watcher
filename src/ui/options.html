@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>美国签证预约监控 — 设置</title>
+  <link rel="stylesheet" href="popup.css">
+  <style>
+    body { width: auto; max-width: 680px; margin: 0 auto; padding: 24px; }
+    fieldset { border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; margin: 0 0 16px; }
+    legend { font-weight: 600; padding: 0 6px; }
+    label { display: block; margin: 10px 0 4px; font-weight: 500; }
+    input[type="text"], input[type="password"], input[type="date"], input[type="number"],
+    textarea {
+      width: 100%; padding: 7px 9px; border: 1px solid var(--line);
+      border-radius: 6px; background: var(--bg); color: var(--fg); font: inherit;
+    }
+    textarea { resize: vertical; font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .hint { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .inline { display: flex; align-items: center; gap: 8px; margin: 12px 0; }
+    .inline input { width: auto; }
+    .inline label { margin: 0; font-weight: 400; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+    .danger { border-color: var(--stop); }
+    .danger legend { color: var(--stop); }
+    .warnbox { background: rgba(217,48,37,.10); border: 1px solid var(--stop);
+               border-radius: 6px; padding: 10px 12px; font-size: 12px; margin-bottom: 8px; }
+    .qa { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; margin-bottom: 8px; align-items: center; }
+    .saved { color: var(--ok); font-size: 12px; margin-left: 10px; }
+  </style>
+</head>
+<body>
+  <h1>美国签证预约监控</h1>
+
+  <fieldset>
+    <legend>关注的日期</legend>
+    <div class="grid">
+      <div>
+        <label for="rangeStart">能接受的最早日期</label>
+        <input type="date" id="rangeStart">
+      </div>
+      <div>
+        <label for="rangeEnd">能接受的最晚日期</label>
+        <input type="date" id="rangeEnd">
+      </div>
+    </div>
+    <div class="hint">留空表示从今天到六个月后。</div>
+
+    <label for="preferredPost">领馆（可选）</label>
+    <input type="text" id="preferredPost" placeholder="例如 GUANGZHOU 或 广州">
+    <div class="hint">
+      填写预约网站领馆下拉框里显示的名字（或其中一部分），不区分大小写。留空则自动选择下拉框里的第一个领馆——你的账号下只有一个领馆时可以不填。
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>推送到手机</legend>
+    <label for="ntfyTopic">ntfy.sh 主题（topic）</label>
+    <input type="text" id="ntfyTopic" placeholder="例如 visa-k3f9x2p7q8m1（请换成你自己的随机字符串）">
+    <div class="hint">
+      留空表示不推送。使用方法：在手机上安装免费的 <strong>ntfy</strong> App，订阅一个主题。
+      主题名就相当于密码&mdash;&mdash;<strong>请起一个又长又随机的名字</strong>，因为任何知道它的人都能看到你的推送。
+      把同一个名字填在这里，之后每一轮检查都会推送一条到手机：成功就推送结果（列出可选日期，或说明没有），失败就推送原因（比如需要登录、网站维护、页面 5 分钟都没打开）。插件提交的预约也会推送。
+      不需要注册账号，只会发送弹窗里本来就显示的状态信息。
+    </div>
+    <div class="inline" style="margin-top:10px">
+      <button type="button" id="testPhone">发送测试推送</button>
+    </div>
+  </fieldset>
+
+  <fieldset class="danger">
+    <legend>自动检查</legend>
+
+    <div class="warnbox">
+      打开后，插件会按设定的时间间隔<strong>在你不操作的情况下</strong>打开预约页面、选择领馆并读取结果。
+      预约网站的条款禁止自动访问，而且网站会主动识别插件。如果网站开始拒绝访问，受影响的是你自己的账号。
+      <br><br>
+      所有操作都在真实的网页标签页里进行，不伪造任何请求。插件只读取它自己发起的检查结果&mdash;&mdash;你自己浏览日历时不会读取。
+      被登出时，会用下面保存的账号信息自动重新登录。遇到人机验证会暂停检查，等你完成验证。
+      遇到网站排队或限流会等待，超过下面的等待上限就重新检查。
+      <strong>一旦出现访问受限，自动检查会被关闭</strong>，直到你在这里重新打开。
+    </div>
+
+    <div class="inline">
+      <input type="checkbox" id="autoCheck">
+      <label for="autoCheck">按时间间隔自动检查</label>
+    </div>
+
+    <div class="grid">
+      <div>
+        <label for="autoCheckMinutes">检查间隔（分钟）</label>
+        <input type="number" id="autoCheckMinutes" min="1" max="600" step="1">
+      </div>
+      <div>
+        <label for="autoCheckJitterPct">间隔随机浮动（&plusmn;%）</label>
+        <input type="number" id="autoCheckJitterPct" min="0" max="90" step="5">
+      </div>
+    </div>
+    <div class="hint">
+      最短 1 分钟。每一轮的间隔都会在 &plusmn; 这个百分比范围内重新随机，比如 10 分钟、&plusmn;30% 就是每次等 7 到 13 分钟。
+      单次检查里的每个操作之间也会间隔 0.7&ndash;2.2 秒&mdash;&mdash;下拉框先出现、后填充选项，出现就立刻操作会选到空白项。
+      <strong>间隔小于 5 分钟会大大加重对网站的访问</strong>，更容易触发封禁或人机验证&mdash;&mdash;被限制的是你自己的账号，所以间隔能长就尽量长。
+    </div>
+
+    <label for="waitMinutes">网站排队或限流时的最长等待时间（分钟）</label>
+    <input type="number" id="waitMinutes" min="1" max="120" step="1">
+    <div class="hint">
+      网站让检查排队或者限流时，插件不刷新也不点击。超过这个时间还没自己恢复，就从头重新检查一次。
+    </div>
+
+    <div class="inline">
+      <input type="checkbox" id="steadyInterval">
+      <label for="steadyInterval">始终使用我设定的间隔（被拒绝后不放慢）</label>
+    </div>
+    <div class="hint">
+      默认开启。关闭后，每次被拒绝或检查失败，下一次的等待时间都会翻倍（最多 16 倍），之后再恢复正常&mdash;&mdash;
+      所以 5 分钟的间隔可能变成 10 或 20 分钟。不管开不开，出现封禁或人机验证时都会暂停检查；这个选项只影响普通检查之间的间隔。
+    </div>
+
+    <div class="inline">
+      <input type="checkbox" id="autoCheckFocus">
+      <label for="autoCheckFocus">每次自动检查时把标签页切到前台</label>
+    </div>
+    <div class="hint">默认关闭：检查在后台标签页里进行，不打扰你当前的窗口。</div>
+
+    <div class="inline">
+      <input type="checkbox" id="autoCheckWhileActive">
+      <label for="autoCheckWhileActive">我正在使用预约网站标签页时也照常检查</label>
+    </div>
+    <div class="hint">
+      默认开启：即使预约网站的标签页就在你眼前，自动检查也会刷新它&mdash;&mdash;这会打断你在上面的操作。
+      取消勾选则会跳过这一轮，等你切走后再检查。
+    </div>
+
+    <div class="inline">
+      <input type="checkbox" id="refreshOnChallenge">
+      <label for="refreshOnChallenge">出现人机验证时刷新一次页面</label>
+    </div>
+    <div class="hint">
+      默认开启。只会刷新验证页面一次&mdash;&mdash;它<strong>不会</strong>帮你通过验证，验证还是要你自己点。
+      每次验证最多刷新一次，所以不会陷入反复刷新。
+    </div>
+
+    <div class="inline">
+      <input type="checkbox" id="autoBook">
+      <label for="autoBook">自动预约最早的符合条件的空位</label>
+    </div>
+    <div class="warnbox">
+      <strong>这会在不询问你的情况下提交真实的预约。</strong>预约网站限制改约次数，错过预约还要重新交费，
+      而且<strong>没有确认步骤</strong>&mdash;&mdash;一提交就生效。只有设置了上面的<strong>能接受的最晚日期</strong>才会执行；
+      它会预约你日期范围内最早的空位，无法确认日期在范围内时不会提交。除非你接受它约下的就是最终结果，否则请保持关闭。
+    </div>
+
+    <label>登录信息（自动检查发现你被登出时使用）</label>
+    <div class="warnbox" id="credWarn">
+      下面的内容会以<strong>明文</strong>保存在插件的本地存储里&mdash;&mdash;也就是浏览器配置目录里的一个普通文件，
+      任何能读取这个目录的程序都能看到。安全问题的答案尤其要慎重：同样的答案往往也能解锁你的其他账号。
+      <br><br>
+      这些都可以留空。留空时，检查发现你被登出就会停下来，由你自己登录。
+    </div>
+    <div class="grid">
+      <div>
+        <label for="loginEmail">预约网站邮箱</label>
+        <input type="text" id="loginEmail" autocomplete="off" placeholder="you@example.com">
+      </div>
+      <div>
+        <label for="loginPassword">预约网站密码</label>
+        <input type="password" id="loginPassword" autocomplete="new-password"
+               placeholder="（留空则不保存）">
+      </div>
+    </div>
+
+    <label for="securityAnswers">安全问题&mdash;&mdash;每行一个，格式 <code>问题 | 答案</code></label>
+    <textarea id="securityAnswers" rows="5" spellcheck="false"
+              placeholder="您的第一只宠物叫什么名字？ | 旺财&#10;您出生在哪个城市？ | 北京"></textarea>
+    <div class="hint">
+      预约网站在输入密码后会问<strong>两个</strong>安全问题，从你设置过的问题里随机挑，事先不知道是哪两个，所以要把可能问到的都填上。
+      问题请按网站上显示的语言原样复制。匹配时忽略大小写和标点。只要有一个问题没有保存答案，检查就会停下来并告诉你要补充的问题原文，
+      <strong>不会填写也不会提交任何内容</strong>&mdash;&mdash;填一半就提交会白白浪费一次尝试，猜答案也一样。
+      已保存的答案显示为圆点；不改动圆点就会保留原来的答案。
+    </div>
+
+    <div class="hint">
+      清空某一栏后保存，就会删除这一栏保存的内容。
+      <button type="button" id="forgetCreds">清除已保存的登录信息</button>
+    </div>
+  </fieldset>
+
+  <p>
+    <button type="button" class="primary" id="save">保存设置</button>
+    <span class="saved" id="savedNote" hidden>已保存</span>
+  </p>
+
+  <script src="options.js" type="module"></script>
+</body>
+</html>

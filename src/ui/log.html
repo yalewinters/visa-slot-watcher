@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>美国签证预约监控 — 操作记录</title>
+  <link rel="stylesheet" href="popup.css">
+  <style>
+    body { width: auto; max-width: 900px; margin: 0 auto; padding: 24px; }
+    h1 { font-size: 18px; margin-bottom: 4px; }
+    .sub { color: var(--muted); margin: 0 0 16px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+    .toolbar select, .toolbar input {
+      font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px;
+      background: var(--bg); color: var(--fg);
+    }
+    .toolbar input { flex: 1; min-width: 160px; }
+    .count { color: var(--muted); font-size: 12px; margin-left: auto; }
+
+    .log { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 8px; }
+    .log li {
+      display: grid; grid-template-columns: 128px 44px 1fr; gap: 10px; align-items: baseline;
+      padding: 7px 12px; border-top: 1px solid var(--line);
+    }
+    .log li:first-child { border-top: 0; }
+    .log .time { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 12px; white-space: nowrap; }
+    .log .src {
+      font-size: 11px; color: var(--muted); background: var(--chip);
+      border-radius: 4px; padding: 0 5px; text-align: center; white-space: nowrap;
+    }
+    .log .text { word-break: break-word; }
+    .log li.ok .text { color: var(--ok); font-weight: 600; }
+    .log li.warn .text { color: var(--warn); }
+    .log li.error .text { color: var(--stop); font-weight: 600; }
+    .log li.day {
+      display: block; background: var(--chip); color: var(--muted);
+      font-size: 12px; font-weight: 600; padding: 4px 12px;
+    }
+    .none { color: var(--muted); padding: 24px; text-align: center; }
+
+    #diagnostics { margin-top: 24px; }
+    #diagnostics pre { max-height: 480px; }
+
+    @media (max-width: 560px) {
+      body { padding: 16px; }
+      .log li { grid-template-columns: 1fr; gap: 2px; }
+      .log .src { justify-self: start; }
+    }
+  </style>
+</head>
+<body>
+  <h1>操作记录</h1>
+  <p class="sub">插件做过的每一步：检查开始和结果、登录、排队、限流、验证、封禁、通知、推送、预约和设置变更。实时更新，最多保留最近 1000 条。</p>
+
+  <div class="toolbar">
+    <select id="filter" aria-label="筛选">
+      <option value="all">全部</option>
+      <option value="result">只看结果和问题</option>
+      <option value="problem">只看问题</option>
+    </select>
+    <input type="search" id="search" placeholder="搜索记录…" aria-label="搜索记录">
+    <button id="copyLog">复制</button>
+    <button id="exportLog">导出为文件</button>
+    <button id="clearLog">清空记录</button>
+    <span class="count" id="count"></span>
+  </div>
+
+  <ul class="log" id="log"></ul>
+
+  <details id="diagnostics">
+    <summary>技术详情（排查问题用）</summary>
+    <p class="empty" id="observedHint">
+      运行一次检查后这里才会有内容。只记录接口路径、操作名称和登录步骤看到了什么，不记录任何具体数值、密码或答案。
+    </p>
+    <pre id="observedList"></pre>
+    <div class="row">
+      <button id="copyObserved">复制</button>
+      <button id="clearObserved">清空</button>
+      <button id="resetAll" title="清除插件状态、已提醒过的日期和技术详情（不影响操作记录）">全部重置</button>
+    </div>
+  </details>
+
+  <script src="log.js" type="module"></script>
+</body>
+</html>

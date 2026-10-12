@@ -1,0 +1,10 @@
+{
+  "name": "us-visa-slot-watcher",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Chrome extension that watches usvisascheduling.com for appointment openings.",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  }
+}
